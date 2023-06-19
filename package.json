@@ -1,0 +1,30 @@
+{
+  "name": "@aux4/db-postgres",
+  "version": "1.0.0",
+  "description": "Database CLI for Postgres",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/aux4/db-postgres.git"
+  },
+  "keywords": [
+    "aux4",
+    "database",
+    "cli",
+    "postgres"
+  ],
+  "author": "Aux4",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/aux4/db-postgres/issues"
+  },
+  "homepage": "https://github.com/aux4/db-postgres#readme",
+  "dependencies": {
+    "merge": "^2.1.1",
+    "pg": "^8.11.0",
+    "pg-query-stream": "^4.5.0"
+  }
+}

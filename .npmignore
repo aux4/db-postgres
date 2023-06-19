@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+test/
+.aux4
+.prettierrc.json
+.idea/

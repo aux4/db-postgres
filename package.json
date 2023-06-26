@@ -1,6 +1,6 @@
 {
   "name": "@aux4/db-postgres",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Database CLI for Postgres",
   "main": "index.js",
   "scripts": {

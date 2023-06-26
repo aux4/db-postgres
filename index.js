@@ -70,7 +70,7 @@ class Database {
 }
 
 function createRequest(sql, params) {
-  const VARIABLE_REGEX = /\${?(\w+)}?/g;
+  const VARIABLE_REGEX = /:(\w+)/g;
 
   let query = sql;
   const arrayParams = [];

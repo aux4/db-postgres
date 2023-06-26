@@ -21,7 +21,7 @@ const db = new Database({
 
 (async () => {
   await db.open();
-  const { data } = await db.execute("select * from table where id = ${id}", { id: 1 });
+  const { data } = await db.execute("select * from table where id = :id", { id: 1 });
   console.log(JSON.stringify(data, null, 2));
   await db.close();
 })();
@@ -38,7 +38,7 @@ const db = new Database({
   database: "template1"
 });
 
-const stream = await db.stream("select * from table where id = ${id}", { id: 1 });
+const stream = await db.stream("select * from table where id = :id", { id: 1 });
 
 stream.on("data", row => {
 console.log(JSON.stringify(row, null, 2));
@@ -67,13 +67,13 @@ $ npm install --global @aux4/db-postgres
 #### Execute Query
 
 ```bash
-$ db execute --host localhost --port 5432 --user postgres --database template1 --query "select * from table where id = ${id}" --id 1
+$ db execute --host localhost --port 5432 --user postgres --database template1 --query "select * from table where id = :id" --id 1
 ```
 
 #### Stream Query
 
 ```bash
-$ db stream --host localhost --port 5432 --user postgres --database template1 --query "select * from table where id = ${id}" --id 1
+$ db stream --host localhost --port 5432 --user postgres --database template1 --query "select * from table where id = :id" --id 1
 ```
 
 #### Using @aux4/config
@@ -92,7 +92,7 @@ config:
 ```
 
 ```bash
-$ db execute --configFile config.yaml --config dev/postgres --query "select * from table where id = ${id}" --id 1
+$ db execute --configFile config.yaml --config dev/postgres --query "select * from table where id = :id" --id 1
 ```
 
 ## See Also

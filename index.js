@@ -70,7 +70,7 @@ class Database {
 }
 
 function createRequest(sql, params) {
-  const VARIABLE_REGEX = /:(\w+)/g;
+  const VARIABLE_REGEX = /[^:]\B:(?<param>\w+)\b/g;
 
   let query = sql;
   const arrayParams = [];
@@ -80,7 +80,7 @@ function createRequest(sql, params) {
 
   let match;
   while ((match = regex.exec(query))) {
-    const key = match[1];
+    const key = match.groups.param;
     const value = params[key];
 
     let paramIndex = arrayParamNames.indexOf(key);
@@ -90,7 +90,7 @@ function createRequest(sql, params) {
       arrayParams.push(value);
     }
 
-    query = query.replace(match[0], `$${paramIndex + 1}`);
+    query = query.replace(`:${key}`, `$${paramIndex + 1}`);
   }
 
   return { query: query, params: arrayParams };

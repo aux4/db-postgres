@@ -79,7 +79,7 @@ function createRequest(sql, params) {
   const regex = new RegExp(VARIABLE_REGEX);
 
   let match;
-  while ((match = regex.exec(query))) {
+  while ((match = regex.exec(sql))) {
     const key = match.groups.param;
     const value = params[key];
 

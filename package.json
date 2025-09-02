@@ -1,30 +1,28 @@
 {
-  "name": "@aux4/db-postgres",
-  "version": "1.0.7",
-  "description": "Database CLI for Postgres",
-  "main": "index.js",
+  "name": "aux4-db-postgres",
+  "version": "1.0.0",
+  "description": "PostgreSQL database tools using pg client",
+  "type": "module",
+  "main": "main.js",
+  "bin": {
+    "aux4-db-postgres": "./package/lib/aux4-db-postgres.js"
+  },
   "scripts": {
-    "test": "jest"
+    "build": "rollup -c",
+    "dev": "node main.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/aux4/db-postgres.git"
-  },
-  "keywords": [
-    "aux4",
-    "database",
-    "cli",
-    "postgres"
-  ],
-  "author": "Aux4",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/aux4/db-postgres/issues"
-  },
-  "homepage": "https://github.com/aux4/db-postgres#readme",
   "dependencies": {
-    "merge": "^2.1.1",
-    "pg": "^8.11.0",
-    "pg-query-stream": "^4.5.0"
-  }
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "rollup": "^4.28.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "",
+  "license": "MIT"
 }

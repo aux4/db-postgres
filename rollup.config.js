@@ -35,6 +35,5 @@ export default {
     'http',
     'https',
     'querystring',
-    'pg'
   ]
 };

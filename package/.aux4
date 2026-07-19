@@ -149,6 +149,218 @@
               }
             ]
           }
+        },
+        {
+          "name": "describe",
+          "execute": [
+            "stdin:aux4 db driver prepare execute --query \"SELECT c.column_name AS \\\"name\\\", c.data_type AS \\\"type\\\", (c.is_nullable = 'YES') AS \\\"nullable\\\", c.column_default AS \\\"default\\\", CASE WHEN pk.column_name IS NOT NULL THEN 'PRI' END AS \\\"key\\\", col_description(CAST(format('%I.%I', c.table_schema, c.table_name) AS regclass), c.ordinal_position) AS \\\"comment\\\" FROM information_schema.columns c LEFT JOIN (SELECT kcu.column_name FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name = :table AND tc.table_schema = COALESCE(NULLIF(:schema, ''), current_schema())) pk ON pk.column_name = c.column_name WHERE c.table_name = :table AND c.table_schema = COALESCE(NULLIF(:schema, ''), current_schema()) ORDER BY c.ordinal_position\" --params value(*) | node ${packageDir}/lib/aux4-db-postgres.js values(host, port, database, user, password) | node -e \"let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const t=d.trim();const o=t?JSON.parse(t).map(r=>{('nullable' in r)?(r.nullable=r.nullable?true:false):0;return Object.keys(r).reduce((a,k)=>{const v=r[k];[null,''].indexOf(v)<0?a[k]=v:0;return a},{});}):'';o?console.log(JSON.stringify(o)):0;});\""
+          ],
+          "help": {
+            "text": "Describe the columns of a table",
+            "variables": [
+              {
+                "name": "host",
+                "text": "Database host",
+                "default": "localhost"
+              },
+              {
+                "name": "port",
+                "text": "Database port",
+                "default": "5432"
+              },
+              {
+                "name": "database",
+                "text": "Database name",
+                "default": "postgres"
+              },
+              {
+                "name": "user",
+                "text": "Database user",
+                "default": "postgres"
+              },
+              {
+                "name": "password",
+                "text": "Database password"
+              },
+              {
+                "name": "table",
+                "text": "Table name to describe"
+              },
+              {
+                "name": "schema",
+                "text": "Schema to inspect (default: current schema)",
+                "default": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "desc",
+          "execute": [
+            "aux4 db postgres describe params(host, port, database, user, password, table, schema)"
+          ],
+          "help": {
+            "text": "Describe the columns of a table (alias of describe)",
+            "variables": [
+              {
+                "name": "host",
+                "text": "Database host",
+                "default": "localhost"
+              },
+              {
+                "name": "port",
+                "text": "Database port",
+                "default": "5432"
+              },
+              {
+                "name": "database",
+                "text": "Database name",
+                "default": "postgres"
+              },
+              {
+                "name": "user",
+                "text": "Database user",
+                "default": "postgres"
+              },
+              {
+                "name": "password",
+                "text": "Database password"
+              },
+              {
+                "name": "table",
+                "text": "Table name to describe"
+              },
+              {
+                "name": "schema",
+                "text": "Schema to inspect (default: current schema)",
+                "default": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "list",
+          "execute": [
+            "profile:db:postgres:list"
+          ],
+          "help": {
+            "text": "List database objects (tables, databases, schemas)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "db:postgres:list",
+      "commands": [
+        {
+          "name": "tables",
+          "execute": [
+            "stdin:aux4 db driver prepare execute --query \"SELECT table_name AS \\\"name\\\", table_catalog AS \\\"database\\\", table_schema AS \\\"schema\\\", obj_description(CAST(format('%I.%I', table_schema, table_name) AS regclass)) AS \\\"comment\\\" FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = COALESCE(NULLIF(:schema, ''), current_schema()) ORDER BY table_name\" --params value(*) | node ${packageDir}/lib/aux4-db-postgres.js values(host, port, database, user, password) | node -e \"let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const t=d.trim();const o=t?JSON.parse(t).map(r=>{('nullable' in r)?(r.nullable=r.nullable?true:false):0;return Object.keys(r).reduce((a,k)=>{const v=r[k];[null,''].indexOf(v)<0?a[k]=v:0;return a},{});}):'';o?console.log(JSON.stringify(o)):0;});\""
+          ],
+          "help": {
+            "text": "List the base tables in the schema",
+            "variables": [
+              {
+                "name": "host",
+                "text": "Database host",
+                "default": "localhost"
+              },
+              {
+                "name": "port",
+                "text": "Database port",
+                "default": "5432"
+              },
+              {
+                "name": "database",
+                "text": "Database name",
+                "default": "postgres"
+              },
+              {
+                "name": "user",
+                "text": "Database user",
+                "default": "postgres"
+              },
+              {
+                "name": "password",
+                "text": "Database password"
+              },
+              {
+                "name": "schema",
+                "text": "Schema to inspect (default: current schema)",
+                "default": ""
+              }
+            ]
+          }
+        },
+        {
+          "name": "databases",
+          "execute": [
+            "stdin:aux4 db driver prepare execute --query \"SELECT datname AS \\\"name\\\" FROM pg_database WHERE datistemplate = false ORDER BY datname\" --params value(*) | node ${packageDir}/lib/aux4-db-postgres.js values(host, port, database, user, password) | node -e \"let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const t=d.trim();const o=t?JSON.parse(t).map(r=>{('nullable' in r)?(r.nullable=r.nullable?true:false):0;return Object.keys(r).reduce((a,k)=>{const v=r[k];[null,''].indexOf(v)<0?a[k]=v:0;return a},{});}):'';o?console.log(JSON.stringify(o)):0;});\""
+          ],
+          "help": {
+            "text": "List the databases on the server",
+            "variables": [
+              {
+                "name": "host",
+                "text": "Database host",
+                "default": "localhost"
+              },
+              {
+                "name": "port",
+                "text": "Database port",
+                "default": "5432"
+              },
+              {
+                "name": "database",
+                "text": "Database name",
+                "default": "postgres"
+              },
+              {
+                "name": "user",
+                "text": "Database user",
+                "default": "postgres"
+              },
+              {
+                "name": "password",
+                "text": "Database password"
+              }
+            ]
+          }
+        },
+        {
+          "name": "schemas",
+          "execute": [
+            "stdin:aux4 db driver prepare execute --query \"SELECT schema_name AS \\\"name\\\" FROM information_schema.schemata ORDER BY schema_name\" --params value(*) | node ${packageDir}/lib/aux4-db-postgres.js values(host, port, database, user, password) | node -e \"let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const t=d.trim();const o=t?JSON.parse(t).map(r=>{('nullable' in r)?(r.nullable=r.nullable?true:false):0;return Object.keys(r).reduce((a,k)=>{const v=r[k];[null,''].indexOf(v)<0?a[k]=v:0;return a},{});}):'';o?console.log(JSON.stringify(o)):0;});\""
+          ],
+          "help": {
+            "text": "List the schemas in the current database",
+            "variables": [
+              {
+                "name": "host",
+                "text": "Database host",
+                "default": "localhost"
+              },
+              {
+                "name": "port",
+                "text": "Database port",
+                "default": "5432"
+              },
+              {
+                "name": "database",
+                "text": "Database name",
+                "default": "postgres"
+              },
+              {
+                "name": "user",
+                "text": "Database user",
+                "default": "postgres"
+              },
+              {
+                "name": "password",
+                "text": "Database password"
+              }
+            ]
+          }
         }
       ]
     }

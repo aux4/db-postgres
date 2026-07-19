@@ -569,3 +569,251 @@ aux4 db postgres stream --host localhost --port 5432 --database test --user post
 ```error
 {"item":{},"query":"SELECT invalid_column FROM users LIMIT 1","error":"column \"invalid_column\" does not exist"}
 ```
+
+# Schema Introspection
+
+```beforeAll
+aux4 db postgres execute --host localhost --port 5432 --user postgres --password mysecretpassword --query "CREATE DATABASE introspect_test"
+```
+
+```beforeAll
+aux4 db postgres execute --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --query "CREATE TABLE IF NOT EXISTS product (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, name VARCHAR(100) NOT NULL, price NUMERIC(10,2) DEFAULT 0.00, sku VARCHAR(50))"
+```
+
+```beforeAll
+aux4 db postgres execute --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --query "COMMENT ON TABLE product IS 'Catalog of products for sale'"
+```
+
+```beforeAll
+aux4 db postgres execute --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --query "COMMENT ON COLUMN product.id IS 'Unique product identifier'"
+```
+
+```beforeAll
+aux4 db postgres execute --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --query "COMMENT ON COLUMN product.name IS 'Product display name'"
+```
+
+```beforeAll
+aux4 db postgres execute --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --query "COMMENT ON COLUMN product.price IS 'Unit price in USD'"
+```
+
+```beforeAll
+aux4 db postgres execute --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --query "CREATE TABLE IF NOT EXISTS tag (id INTEGER PRIMARY KEY)"
+```
+
+```afterAll
+aux4 db postgres execute --host localhost --port 5432 --user postgres --password mysecretpassword --query "DROP DATABASE IF EXISTS introspect_test"
+```
+
+## Describe a table
+
+### should return canonical column metadata, dropping null and empty fields
+
+```execute
+aux4 db postgres describe --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --table product
+```
+
+```expect:json
+[
+  {
+    "name": "id",
+    "type": "integer",
+    "nullable": false,
+    "key": "PRI",
+    "comment": "Unique product identifier"
+  },
+  {
+    "name": "name",
+    "type": "character varying",
+    "nullable": false,
+    "comment": "Product display name"
+  },
+  {
+    "name": "price",
+    "type": "numeric",
+    "nullable": true,
+    "default": "0.00",
+    "comment": "Unit price in USD"
+  },
+  {
+    "name": "sku",
+    "type": "character varying",
+    "nullable": true
+  }
+]
+```
+
+### should keep only present keys per row (null/empty dropped, in definition order)
+
+```execute
+aux4 db postgres describe --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --table product | jq -c 'map(keys_unsorted)'
+```
+
+```expect
+[["name","type","nullable","key","comment"],["name","type","nullable","comment"],["name","type","nullable","default","comment"],["name","type","nullable"]]
+```
+
+### should reduce a plain column to just name, type, nullable
+
+```execute
+aux4 db postgres describe --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --table product | jq -c '.[3]'
+```
+
+```expect
+{"name":"sku","type":"character varying","nullable":true}
+```
+
+### should never emit a null or empty-string value
+
+```execute
+aux4 db postgres describe --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --table product | jq -c '[.[] | to_entries[] | .value] | map(select(. == null or . == "")) | length'
+```
+
+```expect
+0
+```
+
+### should emit nullable as a real JSON boolean (not "YES"/"NO", not 1/0)
+
+```execute
+aux4 db postgres describe --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --table product | jq -c 'map(.nullable | type)'
+```
+
+```expect
+["boolean","boolean","boolean","boolean"]
+```
+
+### should honor an explicit --schema filter
+
+```execute
+aux4 db postgres describe --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --schema public --table product | jq -c '.[0]'
+```
+
+```expect
+{"name":"id","type":"integer","nullable":false,"key":"PRI","comment":"Unique product identifier"}
+```
+
+## Describe a table with the desc alias
+
+### should behave the same as describe
+
+```execute
+aux4 db postgres desc --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --table product
+```
+
+```expect:json
+[
+  {
+    "name": "id",
+    "type": "integer",
+    "nullable": false,
+    "key": "PRI",
+    "comment": "Unique product identifier"
+  },
+  {
+    "name": "name",
+    "type": "character varying",
+    "nullable": false,
+    "comment": "Product display name"
+  },
+  {
+    "name": "price",
+    "type": "numeric",
+    "nullable": true,
+    "default": "0.00",
+    "comment": "Unit price in USD"
+  },
+  {
+    "name": "sku",
+    "type": "character varying",
+    "nullable": true
+  }
+]
+```
+
+## List tables
+
+### should list base tables qualified by database and schema, with comments when present
+
+```execute
+aux4 db postgres list tables --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword
+```
+
+```expect:json
+[
+  {
+    "name": "product",
+    "database": "introspect_test",
+    "schema": "public",
+    "comment": "Catalog of products for sale"
+  },
+  {
+    "name": "tag",
+    "database": "introspect_test",
+    "schema": "public"
+  }
+]
+```
+
+### should keep only present keys per row (empty comment dropped)
+
+```execute
+aux4 db postgres list tables --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword | jq -c 'map(keys_unsorted)'
+```
+
+```expect
+[["name","database","schema","comment"],["name","database","schema"]]
+```
+
+### should never emit a null or empty-string value
+
+```execute
+aux4 db postgres list tables --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword | jq -c '[.[] | to_entries[] | .value] | map(select(. == null or . == "")) | length'
+```
+
+```expect
+0
+```
+
+## List databases
+
+### should include a user database in the server listing
+
+```execute
+aux4 db postgres list databases --host localhost --port 5432 --user postgres --password mysecretpassword | jq -c 'map(.name) | index("introspect_test") != null'
+```
+
+```expect
+true
+```
+
+### should return one canonical {name} object per database
+
+```execute
+aux4 db postgres list databases --host localhost --port 5432 --user postgres --password mysecretpassword | jq -c '[.[] | keys] | unique'
+```
+
+```expect
+[["name"]]
+```
+
+## List schemas
+
+### should include the public schema in the current database
+
+```execute
+aux4 db postgres list schemas --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword | jq -c 'map(.name) | index("public") != null'
+```
+
+```expect
+true
+```
+
+### should return one canonical {name} object per schema
+
+```execute
+aux4 db postgres list schemas --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword | jq -c '[.[] | keys] | unique'
+```
+
+```expect
+[["name"]]
+```

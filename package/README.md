@@ -187,16 +187,6 @@ aux4 db postgres describe \
 
 Only keys that carry a value are returned — `null` and empty (`""`) fields are omitted, so a plain column is just `{"name", "type", "nullable"}`. `nullable` is always present. Primary-key columns are flagged with `key: "PRI"`.
 
-#### aux4 db postgres desc
-
-Alias of `describe` — accepts the exact same flags and produces the exact same output.
-
-```bash
-aux4 db postgres desc \
-  --host localhost --port 5432 --database mydb --user postgres --password mypass \
-  --table product
-```
-
 #### aux4 db postgres list tables
 
 List the base tables in the inspected schema. Each row carries the table `name`, the `database` and `schema` it lives in (so an agent can fully qualify it), and the table `comment` when one is set.

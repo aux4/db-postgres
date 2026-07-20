@@ -195,50 +195,6 @@
           }
         },
         {
-          "name": "desc",
-          "execute": [
-            "aux4 db postgres describe params(host, port, database, user, password, table, schema)"
-          ],
-          "help": {
-            "text": "Describe the columns of a table (alias of describe)",
-            "variables": [
-              {
-                "name": "host",
-                "text": "Database host",
-                "default": "localhost"
-              },
-              {
-                "name": "port",
-                "text": "Database port",
-                "default": "5432"
-              },
-              {
-                "name": "database",
-                "text": "Database name",
-                "default": "postgres"
-              },
-              {
-                "name": "user",
-                "text": "Database user",
-                "default": "postgres"
-              },
-              {
-                "name": "password",
-                "text": "Database password"
-              },
-              {
-                "name": "table",
-                "text": "Table name to describe"
-              },
-              {
-                "name": "schema",
-                "text": "Schema to inspect (default: current schema)",
-                "default": ""
-              }
-            ]
-          }
-        },
-        {
           "name": "list",
           "execute": [
             "profile:db:postgres:list"

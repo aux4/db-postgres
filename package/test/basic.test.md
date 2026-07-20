@@ -692,44 +692,6 @@ aux4 db postgres describe --host localhost --port 5432 --database introspect_tes
 {"name":"id","type":"integer","nullable":false,"key":"PRI","comment":"Unique product identifier"}
 ```
 
-## Describe a table with the desc alias
-
-### should behave the same as describe
-
-```execute
-aux4 db postgres desc --host localhost --port 5432 --database introspect_test --user postgres --password mysecretpassword --table product
-```
-
-```expect:json
-[
-  {
-    "name": "id",
-    "type": "integer",
-    "nullable": false,
-    "key": "PRI",
-    "comment": "Unique product identifier"
-  },
-  {
-    "name": "name",
-    "type": "character varying",
-    "nullable": false,
-    "comment": "Product display name"
-  },
-  {
-    "name": "price",
-    "type": "numeric",
-    "nullable": true,
-    "default": "0.00",
-    "comment": "Unit price in USD"
-  },
-  {
-    "name": "sku",
-    "type": "character varying",
-    "nullable": true
-  }
-]
-```
-
 ## List tables
 
 ### should list base tables qualified by database and schema, with comments when present
